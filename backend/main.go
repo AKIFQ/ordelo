@@ -71,7 +71,7 @@ func run() (err error) {
 		return
 	}
 	srv := &http.Server{
-		Addr:         port,
+		Addr:         ":" + port,
 		BaseContext:  func(_ net.Listener) context.Context { return ctx },
 		ReadTimeout:  2 * time.Second,
 		WriteTimeout: 10 * time.Second,
