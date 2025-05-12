@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"net/url"
 	"os"
+	"strings"
 
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
@@ -19,14 +21,29 @@ func initRedis(c context.Context) (shutdown func(ctx context.Context) error, err
 	ctx, span := Tracer.Start(c, "initRedis")
 	defer span.End()
 
-	addr, password, db := os.Getenv("RD_PORT"), os.Getenv("RD_PASSWORD"), 0
-	if addr == "" {
-		err = errors.New("env variable RD_PORT is empty")
+	redisURL := os.Getenv("REDIS_URL")
+	if redisURL == "" {
+		err = errors.New("env variable REDIS_URL is empty")
 		return
 	}
-	if password == "" {
-		err = errors.New("env variable RD_PASSWORD is empty")
+
+	// Parse the Redis URL
+	parsedURL, err := url.Parse(redisURL)
+	if err != nil {
+		err = errors.New("invalid REDIS_URL format")
 		return
+	}
+
+	// Extract password from URL
+	password := ""
+	if parsedURL.User != nil {
+		password, _ = parsedURL.User.Password()
+	}
+
+	// Get host and port
+	addr := parsedURL.Host
+	if !strings.Contains(addr, ":") {
+		addr = addr + ":6379" // Default Redis port
 	}
 
 	Logger.InfoContext(ctx, "Setting up redis with Opentelemetry", slog.String("Addr", addr),
@@ -59,7 +76,7 @@ func initRedis(c context.Context) (shutdown func(ctx context.Context) error, err
 	RedisClient = redis.NewClient(&redis.Options{
 		Addr:     addr,
 		Password: password,
-		DB:       db,
+		DB:       0,
 	})
 	if RedisClient == nil {
 		Logger.ErrorContext(ctx, "New client function returned nil", slog.String("error", "client returned nil"), redis_source)
