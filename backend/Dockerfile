@@ -10,10 +10,10 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy source code
-COPY . .
+COPY . ./
 
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -o ordelo ./main.go
+# Build the application (compile entire module, not just main.go)
+RUN CGO_ENABLED=0 GOOS=linux go build -o ordelo .
 
 # Final stage
 FROM alpine:latest
@@ -21,10 +21,10 @@ FROM alpine:latest
 WORKDIR /app
 
 # Copy the binary from builder
-COPY --from=builder /app/ordelo .
+COPY --from=builder /app/ordelo ./
 
 # Expose the port the app runs on
 EXPOSE 8080
 
 # Command to run the application
-CMD ["./ordelo"] 
+CMD ["./ordelo"]
