@@ -12,35 +12,48 @@ import (
 
 var r *Repositories
 
-func ATestMain(m *testing.M) {
-	var err error
+func TestMain(m *testing.M) {
+	// 1. Validate required environment variables
+	if os.Getenv("MONGO_URI") == "" {
+		log.Fatal("MONGO_URI must be set (source env.sh)")
+	}
+	if os.Getenv("REDIS_URL") == "" {
+		log.Fatal("REDIS_URL must be set (source env.sh)")
+	}
+	if os.Getenv("DB_NAME") == "" {
+		log.Fatal("DB_NAME must be set (source env.sh)")
+	}
 
-	dbName := os.Getenv("DB_NAME")
-	if dbName == "" {
-		log.Fatal(errors.New("env varible DB_NAME is empty"))
-	}
-	otelShutDown, err := initOtelSDK(context.TODO())
+	// 2. Initialize OTEL, Mongo, Redis, and your Repositories
+	ctx := context.Background()
+
+	otelShutDown, err := initOtelSDK(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("initOtelSDK error: %v", err)
 	}
-	mongoShutDown, err := initDB(context.TODO())
+
+	mongoShutDown, err := initDB(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("initDB error: %v", err)
 	}
-	redisShutDown, err := initRedis(context.TODO())
+
+	redisShutDown, err := initRedis(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("initRedis error: %v", err)
 	}
-	if err = InitCachedMongoRepositories(context.TODO(), RedisClient, MongoClient, 15*time.Minute); err != nil {
-		log.Fatal(err)
+
+	if err = InitCachedMongoRepositories(ctx, RedisClient, MongoClient, 15*time.Minute); err != nil {
+		log.Fatalf("cache init error: %v", err)
 	}
 
 	if r, err = initMongoRepositories(MongoClient); err != nil {
-		log.Fatal(err)
+		log.Fatalf("initMongoRepositories error: %v", err)
 	}
 
+	// 3. Run tests
 	code := m.Run()
 
+	// 4. Teardown: shut down clients, flush logs, etc.
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
@@ -55,14 +68,14 @@ func ATestMain(m *testing.M) {
 	log.Printf("All background tasks completed")
 
 	log.Printf("Cleaning up\n")
-	err = errors.Join(otelShutDown(context.TODO()), err)
-	err = errors.Join(mongoShutDown(context.TODO()), err)
-	err = errors.Join(redisShutDown(context.TODO()), err)
+	err = errors.Join(otelShutDown(ctx), err)
+	err = errors.Join(mongoShutDown(ctx), err)
+	err = errors.Join(redisShutDown(ctx), err)
 
 	if err != nil {
 		log.Printf("Error in cleaning up resources -> %v\n", err)
 	} else {
-		log.Printf("Cleaned up resources successfull\n")
+		log.Printf("Cleaned up resources successfully\n")
 	}
 
 	log.Printf("Exit code -> %d\n", code)
@@ -71,13 +84,13 @@ func ATestMain(m *testing.M) {
 
 func TestUserCreate(t *testing.T) {
 	in := generateUser()
-	id, err := r.User.CreateUser(context.TODO(), in)
+	id, err := r.User.CreateUser(context.Background(), in)
 	if err != nil {
 		t.Fatal(err)
 	}
 	in.ID = id.value
 
-	out, err := r.User.FindUserByID(context.TODO(), id)
+	out, err := r.User.FindUserByID(context.Background(), id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,13 +101,13 @@ func TestUserCreate(t *testing.T) {
 
 func TestVendorCreate(t *testing.T) {
 	in := generateVendor()
-	id, err := r.Vendor.CreateVendor(context.TODO(), in)
+	id, err := r.Vendor.CreateVendor(context.Background(), in)
 	if err != nil {
 		t.Fatal(err)
 	}
 	in.ID = id.value
 
-	out, err := r.Vendor.FindVendorByID(context.TODO(), id)
+	out, err := r.Vendor.FindVendorByID(context.Background(), id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,13 +118,13 @@ func TestVendorCreate(t *testing.T) {
 
 func TestAdminCreate(t *testing.T) {
 	in := generateAdmin()
-	id, err := r.Admin.CreateAdmin(context.TODO(), in)
+	id, err := r.Admin.CreateAdmin(context.Background(), in)
 	if err != nil {
 		t.Fatal(err)
 	}
 	in.ID = id.value
 
-	out, err := r.Admin.FindAdminByID(context.TODO(), id)
+	out, err := r.Admin.FindAdminByID(context.Background(), id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,50 +135,50 @@ func TestAdminCreate(t *testing.T) {
 
 func TestUserDelete(t *testing.T) {
 	in := generateUser()
-	id, err := r.User.CreateUser(context.TODO(), in)
+	id, err := r.User.CreateUser(context.Background(), in)
 	if err != nil {
 		t.Fatal(err)
 	}
 	in.ID = id.value
 
-	err = r.User.DeleteUser(context.TODO(), id)
+	err = r.User.DeleteUser(context.Background(), id)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := r.User.FindUserByID(context.TODO(), ID{in.ID}); err == nil {
+	if _, err := r.User.FindUserByID(context.Background(), ID{in.ID}); err == nil {
 		t.Fatal(err)
 	}
 }
 
 func TestVendorDelete(t *testing.T) {
 	in := generateVendor()
-	id, err := r.Vendor.CreateVendor(context.TODO(), in)
+	id, err := r.Vendor.CreateVendor(context.Background(), in)
 	if err != nil {
 		t.Fatal(err)
 	}
 	in.ID = id.value
 
-	err = r.Vendor.DeleteVendor(context.TODO(), id)
+	err = r.Vendor.DeleteVendor(context.Background(), id)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := r.Vendor.FindVendorByID(context.TODO(), ID{in.ID}); err == nil {
+	if _, err := r.Vendor.FindVendorByID(context.Background(), ID{in.ID}); err == nil {
 		t.Fatal(err)
 	}
 }
 
 func TestAdminDelete(t *testing.T) {
 	in := generateAdmin()
-	id, err := r.Admin.CreateAdmin(context.TODO(), in)
+	id, err := r.Admin.CreateAdmin(context.Background(), in)
 	if err != nil {
 		t.Fatal(err)
 	}
 	in.ID = id.value
-	err = r.Admin.Delete(context.TODO(), id)
+	err = r.Admin.Delete(context.Background(), id)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := r.Admin.FindAdminByID(context.TODO(), ID{in.ID}); err == nil {
+	if _, err := r.Admin.FindAdminByID(context.Background(), ID{in.ID}); err == nil {
 		t.Fatal(err)
 	}
 }
