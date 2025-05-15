@@ -4,7 +4,7 @@ import CartPanel from "../components/CartPanel";
 import SelectedIngredientsPanel from "../components/SelectedIngredientsPanel";
 import VendorDiscovery from "../components/VendorDiscovery";
 import { useShoppingContext } from "../context/ShoppingContext";
-import { calculateDistance } from "/Users/zohaahmed/ordelo/ordelo/frontend/src/components/distance.js";
+import { calculateDistance } from "../components/distance.js";
 
 function ShoppingPage() {
   const location = useLocation();

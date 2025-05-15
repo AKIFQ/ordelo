@@ -139,12 +139,12 @@ function RecipeDetails() {
         {/* Right side - Image */}
         <div className="recipe-image-container">
           <img 
-            src={recipe.image || '/src/assets/placeholder-food.jpg'}
+            src={recipe.image || '/assets/placeholder-food.jpg'}
             alt={recipe.title}
             className="recipe-details-image"
             onError={e => {
               e.target.onerror = null;
-              e.target.src = '/src/assets/no-recipe-img.png';
+              e.target.src = '/assets/no-recipe-img.png';
             }}
           />
         </div>

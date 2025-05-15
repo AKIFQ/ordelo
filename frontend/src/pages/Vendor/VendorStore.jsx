@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { firebaseConfig } from "/Users/zohaahmed/ordelo/ordelo/frontend/src/firebase/firebase.js";
-import { getCurrentLocation } from "/Users/zohaahmed/ordelo/ordelo/frontend/src/components/getLocation.js";
+import { firebaseConfig } from "../../firebase/firebase.js";
+import { getCurrentLocation } from "../../components/getLocation.js";
 
 const GOOGLE_MAPS_API_KEY = firebaseConfig.apiKey;
 

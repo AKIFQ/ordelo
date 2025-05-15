@@ -220,16 +220,16 @@ function Home() {
             <h2 className="section-title">Browse by Ingredients</h2>
             <div className="ingredients-grid">
               {[
-                { name: "chicken", img: "/src/assets/ingredients/chicken.png" },
-                { name: "vegetables", img: "/src/assets/ingredients/vegetable.png" },
-                { name: "seafood", img: "/src/assets/ingredients/seafood.png" },
-                { name: "beef", img: "/src/assets/ingredients/beef.png" },
+                { name: "chicken", img: "/assets/ingredients/chicken.png" },
+                { name: "vegetables", img: "/assets/ingredients/vegetable.png" },
+                { name: "seafood", img: "/assets/ingredients/seafood.png" },
+                { name: "beef", img: "/assets/ingredients/beef.png" },
               ].map(({ name, img }) => (
                 <div key={name} className="ingredient-card" onClick={() => handleSearch(name)}>
                   <div className="ingredient-img-container">
                     <img src={img} alt={name} className="ingredient-img" onError={e => {
                       e.target.onerror = null;
-                      e.target.src = '/src/assets/no-recipe-img.png';
+                      e.target.src = '/assets/no-recipe-img.png';
                     }} />
                   </div>
                   <h3>{name.charAt(0).toUpperCase() + name.slice(1)}</h3>

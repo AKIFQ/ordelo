@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRecipes } from "../context/RecipeContext";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { getCurrentLocation } from "/Users/zohaahmed/ordelo/ordelo/frontend/src/components/getLocation.js";
+import { getCurrentLocation } from "../components/getLocation.js";
 
 const FOOD_CATEGORIES = {
   PRODUCE: "Produce",
@@ -459,12 +459,12 @@ function ShoppingList() {
                         <div className="item-image-col">
                           <div className="item-image-container">
                             <img 
-                              src={item.image ? `https://spoonacular.com/cdn/ingredients_100x100/${item.image}` : '/src/assets/no-recipe-img.png'} 
+                              src={item.image ? `${item.image}` : '/assets/no-recipe-img.png'} 
                               alt={item.name}
                               className="item-image"
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = '/src/assets/no-recipe-img.png';
+                                e.target.src = '/assets/no-recipe-img.png';
                               }}
                             />
                           </div>
@@ -532,12 +532,12 @@ function ShoppingList() {
                         <div className="item-image-col">
                           <div className="item-image-container">
                             <img 
-                              src={item.image ? `https://spoonacular.com/cdn/ingredients_100x100/${item.image}` : '/src/assets/no-recipe-img.png'} 
+                              src={item.image ? `${item.image}` : '/assets/no-recipe-img.png'} 
                               alt={item.name}
                               className="item-image"
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = '/src/assets/no-recipe-img.png';
+                                e.target.src = '/assets/no-recipe-img.png';
                               }}
                             />
                           </div>

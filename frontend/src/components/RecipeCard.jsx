@@ -22,12 +22,12 @@ function RecipeCard({ recipe }) {
     >
       <div className="recipe-image-container" style={{ position: 'relative' }}>
         <img 
-          src={recipe.image || '/src/assets/placeholder-food.jpg'} 
+          src={recipe.image || '/assets/placeholder-food.jpg'} 
           alt={recipe.title} 
           className="recipe-image" 
           onError={e => {
             e.target.onerror = null;
-            e.target.src = '/src/assets/no-recipe-img.png';
+            e.target.src = '/assets/no-recipe-img.png';
           }}
         />
         {isHovered && (

@@ -30,7 +30,7 @@
 
 .auth-image {
   flex: 1;
-  background-image: url('/src/assets/auth-image.jpg');
+  background-image: url('/assets/auth-image.jpg');
   background-size: cover;
   background-position: center;
   position: relative;
